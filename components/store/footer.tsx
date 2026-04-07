@@ -16,7 +16,7 @@ export function Footer() {
               blend fashion with function.
             </p>
             <p className="mt-3 text-sm text-background/70">
-              Physical Shop: House 12, Road 7, Dhanmondi, Dhaka 1205, Bangladesh
+              Physical Shop: EYE GLAM, Al Aqsa Tower,Shop 2, Patuatuli 8, Dhaka-1100, Bangladesh
             </p>
             <div className="mt-6 flex gap-4">
               <a
