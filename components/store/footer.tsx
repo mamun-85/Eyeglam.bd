@@ -16,7 +16,7 @@ export function Footer() {
               blend fashion with function.
             </p>
             <p className="mt-3 text-sm text-background/70">
-              Physical Shop: EYEGLAM, Al Aqsa Tower,Shop no -2,8 No Patuatuli,Dhaka-1100,Bangladesh.
+              Physical Shop: Al Aqsa Tower,Shop no -2,8 No Patuatuli,Dhaka-1100,Bangladesh.
             </p>
             <div className="mt-6 flex gap-4">
               <a
