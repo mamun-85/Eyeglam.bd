@@ -14,6 +14,14 @@ export interface CustomFrameBuilderSettings {
   add_on_options: PricedOption[]
 }
 
+export interface StorefrontFeaturesSettings {
+  whatsapp_number: string
+  whatsapp_message_template: string
+  enable_whatsapp_fab: boolean
+  enable_mobile_bottom_nav: boolean
+  enable_mobile_bottom_sheet_filters: boolean
+}
+
 export const DEFAULT_SHIPPING_INFO: ShippingInfoSettings = {
   free_shipping_threshold: 1000,
   inside_dhaka_shipping: 80,
@@ -32,6 +40,14 @@ export const DEFAULT_CUSTOM_FRAME_BUILDER: CustomFrameBuilderSettings = {
     { name: "Scratch Resistant Coating", price: 250 },
     { name: "UV Protection Upgrade", price: 300 },
   ],
+}
+
+export const DEFAULT_STOREFRONT_FEATURES: StorefrontFeaturesSettings = {
+  whatsapp_number: "8801317910996",
+  whatsapp_message_template: "Hi EyeGlam! I'm interested in {product} - {link}.",
+  enable_whatsapp_fab: true,
+  enable_mobile_bottom_nav: true,
+  enable_mobile_bottom_sheet_filters: true,
 }
 
 export function parseSettingValue<T>(value: unknown): T | null {
@@ -116,5 +132,32 @@ export function resolveCustomFrameBuilderSettings(value: unknown): CustomFrameBu
   return {
     lens_options: lensOptions,
     add_on_options: addOnOptions,
+  }
+}
+
+export function resolveStorefrontFeaturesSettings(value: unknown): StorefrontFeaturesSettings {
+  const parsed = parseSettingValue<Partial<StorefrontFeaturesSettings>>(value) || {}
+
+  return {
+    whatsapp_number:
+      typeof parsed.whatsapp_number === "string" && parsed.whatsapp_number.trim()
+        ? parsed.whatsapp_number.trim()
+        : DEFAULT_STOREFRONT_FEATURES.whatsapp_number,
+    whatsapp_message_template:
+      typeof parsed.whatsapp_message_template === "string" && parsed.whatsapp_message_template.trim()
+        ? parsed.whatsapp_message_template.trim()
+        : DEFAULT_STOREFRONT_FEATURES.whatsapp_message_template,
+    enable_whatsapp_fab:
+      typeof parsed.enable_whatsapp_fab === "boolean"
+        ? parsed.enable_whatsapp_fab
+        : DEFAULT_STOREFRONT_FEATURES.enable_whatsapp_fab,
+    enable_mobile_bottom_nav:
+      typeof parsed.enable_mobile_bottom_nav === "boolean"
+        ? parsed.enable_mobile_bottom_nav
+        : DEFAULT_STOREFRONT_FEATURES.enable_mobile_bottom_nav,
+    enable_mobile_bottom_sheet_filters:
+      typeof parsed.enable_mobile_bottom_sheet_filters === "boolean"
+        ? parsed.enable_mobile_bottom_sheet_filters
+        : DEFAULT_STOREFRONT_FEATURES.enable_mobile_bottom_sheet_filters,
   }
 }

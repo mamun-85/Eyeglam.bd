@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { createClient } from "@/lib/supabase/server"
 import { ProductDetail } from "@/components/store/product-detail"
 import { FeaturedProducts } from "@/components/store/featured-products"
+import { resolveStorefrontFeaturesSettings } from "@/lib/site-settings"
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>
@@ -35,12 +36,32 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params
   const supabase = await createClient()
 
-  const { data: product } = await supabase
+  const { data: relationalProduct, error: relationalError } = await supabase
     .from("products")
-    .select("*, category:categories(*)")
+    .select(`
+      *,
+      category:categories(*),
+      variant_rows:product_variants(
+        id,
+        stock,
+        color:colors(id, color_name, hex_code),
+        images:product_images(id, url, sort_order)
+      )
+    `)
     .eq("slug", slug)
     .eq("is_active", true)
     .single()
+
+  const { data: legacyProduct } = relationalError
+    ? await supabase
+        .from("products")
+        .select("*, category:categories(*)")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .single()
+    : { data: null as any }
+
+  const product = relationalProduct || legacyProduct
 
   if (!product) {
     notFound()
@@ -54,9 +75,33 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .eq("category_id", product.category_id)
     .limit(4)
 
+  const variantOptions = (((product as any).variant_rows || []) as any[]).map((variant: any) => ({
+    id: variant.id,
+    stock: variant.stock || 0,
+    color_name: variant.color?.color_name || "Unknown",
+    color_hex: variant.color?.hex_code || "#111111",
+    images: (variant.images || [])
+      .sort((a: any, b: any) => a.sort_order - b.sort_order)
+      .map((image: any) => image.url),
+  }))
+
+  const { data: storefrontFeatureSetting } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", "storefront_features")
+    .maybeSingle()
+  const storefrontFeatures = resolveStorefrontFeaturesSettings(
+    storefrontFeatureSetting?.value
+  )
+
   return (
     <div className="py-8">
-      <ProductDetail product={product} />
+      <ProductDetail
+        product={product}
+        whatsappNumber={storefrontFeatures.whatsapp_number}
+        whatsappMessageTemplate={storefrontFeatures.whatsapp_message_template}
+        variantOptions={variantOptions}
+      />
       {relatedProducts && relatedProducts.length > 0 && (
         <div className="mt-16">
           <FeaturedProducts products={relatedProducts} />

@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { CategoriesManager } from "@/components/admin/categories-manager"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminCategoriesPage() {
   const supabase = await createClient()
 

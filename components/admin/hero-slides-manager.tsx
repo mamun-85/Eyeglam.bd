@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { Plus, Pencil, Trash2 } from "lucide-react"
+import { Plus, Pencil, Trash2, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,6 +18,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import { createClient } from "@/lib/supabase/client"
+import { uploadImageAndGetPublicUrl } from "@/lib/supabase/upload"
 import type { HeroSlide } from "@/lib/types"
 
 interface HeroSlidesManagerProps {
@@ -30,6 +31,7 @@ export function HeroSlidesManager({ initialSlides }: HeroSlidesManagerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
@@ -38,6 +40,10 @@ export function HeroSlidesManager({ initialSlides }: HeroSlidesManagerProps) {
     button_link: "",
     is_active: true,
   })
+
+  useEffect(() => {
+    setSlides(initialSlides)
+  }, [initialSlides])
 
   const resetForm = () => {
     setFormData({
@@ -104,6 +110,23 @@ export function HeroSlidesManager({ initialSlides }: HeroSlidesManagerProps) {
     router.refresh()
   }
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setIsUploadingImage(true)
+    try {
+      const url = await uploadImageAndGetPublicUrl(file, "hero")
+      setFormData((prev) => ({ ...prev, image_url: url }))
+    } catch (err) {
+      console.error("Hero image upload failed:", err)
+      const message = err instanceof Error ? err.message : "Upload failed."
+      alert(message)
+    } finally {
+      setIsUploadingImage(false)
+      e.target.value = ""
+    }
+  }
+
   return (
     <div>
       <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm() }}>
@@ -145,6 +168,22 @@ export function HeroSlidesManager({ initialSlides }: HeroSlidesManagerProps) {
                 onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                 required
               />
+              <div className="flex items-center gap-3">
+                <Label
+                  htmlFor="hero_image_upload"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm"
+                >
+                  <Upload className="h-4 w-4" />
+                  {isUploadingImage ? "Uploading..." : "Upload photo"}
+                </Label>
+                <Input
+                  id="hero_image_upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">

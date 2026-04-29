@@ -15,6 +15,7 @@ import {
   parsePricedOptionsInput,
   pricedOptionsToInput,
   resolveCustomFrameBuilderSettings,
+  resolveStorefrontFeaturesSettings,
 } from "@/lib/site-settings"
 
 interface SettingsFormProps {
@@ -29,6 +30,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   const shippingInfo = resolveShippingInfo(settings.shipping_info)
   const socialLinks = parseSettingValue<{ instagram?: string; facebook?: string; twitter?: string }>(settings.social_links) || {}
   const customFrameBuilder = resolveCustomFrameBuilderSettings(settings.custom_frame_builder)
+  const storefrontFeatures = resolveStorefrontFeaturesSettings(settings.storefront_features)
 
   const [formData, setFormData] = useState({
     site_name: (settings.site_name as string) || "Eyeglam",
@@ -44,6 +46,11 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     outside_dhaka_shipping: shippingInfo.outside_dhaka_shipping.toString(),
     custom_lens_options: pricedOptionsToInput(customFrameBuilder.lens_options),
     custom_add_on_options: pricedOptionsToInput(customFrameBuilder.add_on_options),
+    whatsapp_number: storefrontFeatures.whatsapp_number,
+    whatsapp_message_template: storefrontFeatures.whatsapp_message_template,
+    enable_whatsapp_fab: storefrontFeatures.enable_whatsapp_fab,
+    enable_mobile_bottom_nav: storefrontFeatures.enable_mobile_bottom_nav,
+    enable_mobile_bottom_sheet_filters: storefrontFeatures.enable_mobile_bottom_sheet_filters,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,6 +87,16 @@ export function SettingsForm({ settings }: SettingsFormProps) {
         value: JSON.stringify({
           lens_options: parsePricedOptionsInput(formData.custom_lens_options),
           add_on_options: parsePricedOptionsInput(formData.custom_add_on_options),
+        }),
+      },
+      {
+        key: "storefront_features",
+        value: JSON.stringify({
+          whatsapp_number: formData.whatsapp_number,
+          whatsapp_message_template: formData.whatsapp_message_template,
+          enable_whatsapp_fab: formData.enable_whatsapp_fab,
+          enable_mobile_bottom_nav: formData.enable_mobile_bottom_nav,
+          enable_mobile_bottom_sheet_filters: formData.enable_mobile_bottom_sheet_filters,
         }),
       },
     ]
@@ -191,6 +208,67 @@ export function SettingsForm({ settings }: SettingsFormProps) {
               value={formData.twitter}
               onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Storefront Features</CardTitle>
+          <CardDescription>
+            Configure WhatsApp and mobile UX feature toggles.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="whatsapp_number">WhatsApp Number (international format)</Label>
+            <Input
+              id="whatsapp_number"
+              value={formData.whatsapp_number}
+              onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+              placeholder="8801317910996"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="whatsapp_message_template">WhatsApp Message Template</Label>
+            <Textarea
+              id="whatsapp_message_template"
+              value={formData.whatsapp_message_template}
+              onChange={(e) => setFormData({ ...formData, whatsapp_message_template: e.target.value })}
+              rows={3}
+              placeholder="Hi EyeGlam! I'm interested in {product} - {link}."
+            />
+            <p className="text-xs text-muted-foreground">
+              Available tokens: {"{product}"}, {"{link}"}
+            </p>
+          </div>
+          <div className="grid gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={formData.enable_whatsapp_fab}
+                onChange={(e) => setFormData({ ...formData, enable_whatsapp_fab: e.target.checked })}
+              />
+              Enable WhatsApp floating action button
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={formData.enable_mobile_bottom_nav}
+                onChange={(e) => setFormData({ ...formData, enable_mobile_bottom_nav: e.target.checked })}
+              />
+              Enable mobile sticky bottom navigation
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={formData.enable_mobile_bottom_sheet_filters}
+                onChange={(e) =>
+                  setFormData({ ...formData, enable_mobile_bottom_sheet_filters: e.target.checked })
+                }
+              />
+              Enable mobile bottom-sheet filters/search
+            </label>
           </div>
         </CardContent>
       </Card>

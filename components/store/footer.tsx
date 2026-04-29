@@ -16,18 +16,18 @@ export function Footer() {
               blend fashion with function.
             </p>
             <p className="mt-3 text-sm text-background/70">
-              Physical Shop: House 12, Road 7, Dhanmondi, Dhaka 1205, Bangladesh
+              Physical Shop: EYEGLAM, Al Aqsa Tower,Shop no -2,8 No Patuatuli,Dhaka-1100,Bangladesh.
             </p>
             <div className="mt-6 flex gap-4">
               <a
-                href="#"
+                href="https://www.instagram.com/eyeglambd?utm_source=qr&igsh=MXg2NGxxdmVxbzF3YQ=="
                 className="text-background/70 hover:text-background transition-colors"
               >
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
               </a>
               <a
-                href="#"
+                href="https://www.facebook.com/share/1b3KjPAj3V/?mibextid=wwXIfr"
                 className="text-background/70 hover:text-background transition-colors"
               >
                 <Facebook className="h-5 w-5" />

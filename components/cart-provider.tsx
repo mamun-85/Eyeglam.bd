@@ -9,6 +9,8 @@ export interface CartItem {
   sale_price: number | null
   image: string
   quantity: number
+  selected_color?: string
+  selected_color_image?: string
   custom_details?: {
     base_product_id: string
     lens_type: string
@@ -57,14 +59,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (newItem: Omit<CartItem, "quantity"> & { quantity?: number }) => {
     const incomingQty = newItem.quantity ?? 1
+    // Use composite key: id + color for color-variant support
+    const itemKey = newItem.selected_color
+      ? `${newItem.id}-${newItem.selected_color}`
+      : newItem.id
     setItems((prev) => {
-      const existing = prev.find((item) => item.id === newItem.id)
+      const existing = prev.find((item) => {
+        const existingKey = item.selected_color
+          ? `${item.id}-${item.selected_color}`
+          : item.id
+        return existingKey === itemKey
+      })
       if (existing) {
-        return prev.map((item) =>
-          item.id === newItem.id
+        return prev.map((item) => {
+          const ik = item.selected_color
+            ? `${item.id}-${item.selected_color}`
+            : item.id
+          return ik === itemKey
             ? { ...item, quantity: item.quantity + incomingQty }
             : item
-        )
+        })
       }
       return [...prev, { ...newItem, quantity: incomingQty }]
     })

@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { HeroSlidesManager } from "@/components/admin/hero-slides-manager"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminHeroSlidesPage() {
   const supabase = await createClient()
 

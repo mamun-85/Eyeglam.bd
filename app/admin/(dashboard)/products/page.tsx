@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { ProductsTable } from "@/components/admin/products-table"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminProductsPage() {
   const supabase = await createClient()
 

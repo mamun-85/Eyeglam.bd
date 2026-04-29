@@ -2,7 +2,11 @@ import { Suspense } from "react"
 import { createClient } from "@/lib/supabase/server"
 import { ProductCard } from "@/components/store/product-card"
 import { ProductFilters } from "@/components/store/product-filters"
+import { ProductGridSkeleton } from "@/components/store/product-skeleton"
+import { resolveStorefrontFeaturesSettings } from "@/lib/site-settings"
 import type { Metadata } from "next"
+
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Products | Eyeglam",
@@ -10,7 +14,7 @@ export const metadata: Metadata = {
 }
 
 interface ProductsPageProps {
-  searchParams: Promise<{ category?: string; sort?: string }>
+  searchParams: Promise<{ category?: string; sort?: string; shape?: string; q?: string; focus_search?: string }>
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
@@ -25,6 +29,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   let query = supabase.from("products").select("*").eq("is_active", true)
 
+  // Category filter
   if (params.category) {
     const { data: category } = await supabase
       .from("categories")
@@ -37,6 +42,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     }
   }
 
+  // Frame shape filter
+  if (params.shape) {
+    query = query.eq("frame_shape", params.shape)
+  }
+
+  // Keyword search
+  if (params.q) {
+    query = query.ilike("name", `%${params.q}%`)
+  }
+
+  // Sorting
   switch (params.sort) {
     case "price-asc":
       query = query.order("price", { ascending: true })
@@ -52,6 +68,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   }
 
   const { data: products } = await query
+  const { data: storefrontFeatureSetting } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", "storefront_features")
+    .maybeSingle()
+  const storefrontFeatures = resolveStorefrontFeaturesSettings(
+    storefrontFeatureSetting?.value
+  )
 
   const currentCategory = categories?.find((c) => c.slug === params.category)
 
@@ -73,6 +97,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           categories={categories || []}
           currentCategory={params.category}
           currentSort={params.sort}
+          currentShape={params.shape}
+          currentQuery={params.q}
+          enableMobileBottomSheetFilters={
+            storefrontFeatures.enable_mobile_bottom_sheet_filters
+          }
+          focusSearch={params.focus_search === "1"}
         />
       </Suspense>
 
@@ -84,8 +114,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         </div>
       ) : (
         <div className="mt-16 text-center">
-          <p className="text-lg text-muted-foreground">
-            No products found in this category.
+          <div className="mx-auto h-24 w-24 rounded-full bg-muted flex items-center justify-center mb-4">
+            <svg className="h-10 w-10 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </div>
+          <p className="text-lg font-medium text-foreground">No products found</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Try adjusting your filters or browse all products
           </p>
         </div>
       )}

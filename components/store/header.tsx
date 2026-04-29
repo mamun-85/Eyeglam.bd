@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { Menu, ShoppingBag, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -15,7 +16,21 @@ interface HeaderProps {
 
 export function Header({ categories }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const pathname = usePathname()
+  const router = useRouter()
   const { totalItems, setIsOpen } = useCart()
+
+  const navItems = [
+    { href: "/products", label: "All Products" },
+    { href: "/wholesale", label: "Wholesale" },
+    { href: "/custom-frames", label: "Custom Frames" },
+  ]
+
+  const submitSearch = () => {
+    const query = searchTerm.trim()
+    router.push(query ? `/products?q=${encodeURIComponent(query)}` : "/products?focus_search=1")
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
@@ -90,30 +105,28 @@ export function Header({ categories }: HeaderProps) {
           </div>
 
           {/* Desktop navigation */}
-          <div className="hidden lg:flex lg:gap-x-8">
-            <Link
-              href="/products"
-              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
-            >
-              All Products
-            </Link>
-            <Link
-              href="/wholesale"
-              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
-            >
-              Wholesale
-            </Link>
-            <Link
-              href="/custom-frames"
-              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
-            >
-              Custom Frames
-            </Link>
+          <div className="hidden lg:flex lg:gap-x-3">
+            {navItems.map((item) => {
+              const isActive = pathname.startsWith(item.href)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-foreground text-background"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
             {categories.slice(0, 5).map((category) => (
               <Link
                 key={category.id}
                 href={`/products?category=${category.slug}`}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               >
                 {category.name}
               </Link>
@@ -122,7 +135,23 @@ export function Header({ categories }: HeaderProps) {
 
           {/* Right side icons */}
           <div className="flex flex-1 items-center justify-end gap-2">
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-border bg-background px-3">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") submitSearch()
+                }}
+                placeholder="Search eyewear..."
+                className="h-9 w-40 bg-transparent text-sm outline-none"
+              />
+              <Button variant="ghost" size="sm" onClick={submitSearch}>
+                Go
+              </Button>
+            </div>
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={submitSearch}>
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </Button>

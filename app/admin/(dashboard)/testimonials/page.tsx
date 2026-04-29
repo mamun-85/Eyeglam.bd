@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { TestimonialsManager } from "@/components/admin/testimonials-manager"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminTestimonialsPage() {
   const supabase = await createClient()
 

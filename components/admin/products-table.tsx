@@ -62,8 +62,9 @@ export function ProductsTable({ products }: ProductsTableProps) {
             <TableRow key={product.id}>
               <TableCell>
                 <div className="relative h-12 w-12 overflow-hidden rounded-md bg-muted">
+                  {/** Fallback to placeholder if legacy images array is empty */}
                   <Image
-                    src={product.images[0] || "/placeholder.svg"}
+                    src={product.images?.[0] || product.thumbnail_url || "/placeholder.svg"}
                     alt={product.name}
                     fill
                     className="object-cover"

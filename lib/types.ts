@@ -10,6 +10,31 @@ export interface Category {
   updated_at: string
 }
 
+export type FrameShape = 'round' | 'aviator' | 'wayfarer' | 'cat-eye' | 'rectangle' | 'square' | 'oval' | 'browline'
+
+export interface FrameShapeItem {
+  id: string
+  slug: FrameShape
+  label: string
+  sort_order: number
+}
+
+export interface ColorVariant {
+  color_name: string
+  color_hex: string
+  image_url: string
+}
+
+export interface WishlistItem {
+  id: string
+  name: string
+  slug: string
+  price: number
+  sale_price: number | null
+  image: string
+  added_at: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -19,6 +44,11 @@ export interface Product {
   sale_price: number | null
   category_id: string | null
   images: string[]
+  thumbnail_url: string | null
+  gallery_urls: string[]
+  video_url: string | null
+  frame_shape: FrameShape | null
+  variants: ColorVariant[] | null
   features: string[]
   specifications: Record<string, string>
   stock_quantity: number
@@ -27,6 +57,27 @@ export interface Product {
   created_at: string
   updated_at: string
   category?: Category
+  shape_id?: string | null
+}
+
+export interface ProductVariantImage {
+  id: string
+  variant_id: string
+  url: string
+  sort_order: number
+}
+
+export interface ProductVariant {
+  id: string
+  product_id: string
+  color_id: string
+  stock: number
+  color: {
+    id: string
+    color_name: string
+    hex_code: string
+  } | null
+  images: ProductVariantImage[]
 }
 
 export interface HeroSlide {

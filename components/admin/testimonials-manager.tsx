@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Plus, Pencil, Trash2, Star } from "lucide-react"
@@ -39,6 +39,10 @@ export function TestimonialsManager({ initialTestimonials }: TestimonialsManager
     avatar_url: "",
     is_active: true,
   })
+
+  useEffect(() => {
+    setTestimonials(initialTestimonials)
+  }, [initialTestimonials])
 
   const resetForm = () => {
     setFormData({
