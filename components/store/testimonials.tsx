@@ -11,13 +11,13 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
   if (testimonials.length === 0) return null
 
   return (
-    <section className="py-16 sm:py-24">
+    <section className="py-12 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h2 className="font-serif text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
             What Our Customers Say
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-3 text-sm sm:mt-4 sm:text-lg text-muted-foreground">
             Join thousands of satisfied customers worldwide
           </p>
         </div>

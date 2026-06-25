@@ -48,11 +48,11 @@ export function MarketingShowcase() {
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center gap-3">
-          <Button asChild>
+        <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
+          <Button asChild className="w-full sm:w-auto">
             <Link href="/products">Shop Collection</Link>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="w-full sm:w-auto">
             <Link href="/custom-frames">Build Custom Frame</Link>
           </Button>
         </div>

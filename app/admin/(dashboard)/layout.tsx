@@ -14,7 +14,9 @@ export default async function AdminLayout({
     redirect("/admin/login")
   }
 
-  const isAdmin = user.user_metadata?.is_admin === true
+  // Use app_metadata (service-role only, NOT user-writable) to prevent
+  // privilege escalation. user_metadata can be self-edited via updateUser().
+  const isAdmin = user.app_metadata?.is_admin === true
   if (!isAdmin) {
     redirect("/admin/login")
   }

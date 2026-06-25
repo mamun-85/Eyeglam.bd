@@ -16,6 +16,15 @@ import {
   pricedOptionsToInput,
   resolveCustomFrameBuilderSettings,
   resolveStorefrontFeaturesSettings,
+  resolveMarketingContent,
+  parseLinesInput,
+  linesToInput,
+  parseStatsInput,
+  statsToInput,
+  resolveMarketingGallery,
+  parseGalleryInput,
+  galleryToInput,
+  resolvePromoPopup,
 } from "@/lib/site-settings"
 
 interface SettingsFormProps {
@@ -31,6 +40,9 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   const socialLinks = parseSettingValue<{ instagram?: string; facebook?: string; twitter?: string }>(settings.social_links) || {}
   const customFrameBuilder = resolveCustomFrameBuilderSettings(settings.custom_frame_builder)
   const storefrontFeatures = resolveStorefrontFeaturesSettings(settings.storefront_features)
+  const marketing = resolveMarketingContent(settings.marketing_content)
+  const gallery = resolveMarketingGallery(settings.marketing_gallery)
+  const promo = resolvePromoPopup(settings.promo_popup)
 
   const [formData, setFormData] = useState({
     site_name: (settings.site_name as string) || "Eyeglam",
@@ -51,6 +63,41 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     enable_whatsapp_fab: storefrontFeatures.enable_whatsapp_fab,
     enable_mobile_bottom_nav: storefrontFeatures.enable_mobile_bottom_nav,
     enable_mobile_bottom_sheet_filters: storefrontFeatures.enable_mobile_bottom_sheet_filters,
+    // Marketing — Brand Promise
+    bp_enabled: marketing.brand_promise.enabled,
+    bp_eyebrow: marketing.brand_promise.eyebrow,
+    bp_heading: marketing.brand_promise.heading,
+    bp_heading_highlight: marketing.brand_promise.heading_highlight,
+    bp_description: marketing.brand_promise.description,
+    bp_badges: linesToInput(marketing.brand_promise.badges),
+    bp_stats: statsToInput(marketing.brand_promise.stats),
+    // Marketing — Style Guide
+    sg_enabled: marketing.style_guide.enabled,
+    sg_eyebrow: marketing.style_guide.eyebrow,
+    sg_heading: marketing.style_guide.heading,
+    sg_description: marketing.style_guide.description,
+    sg_cta_label: marketing.style_guide.cta_label,
+    // Marketing — Newsletter
+    nl_enabled: marketing.newsletter.enabled,
+    nl_eyebrow: marketing.newsletter.eyebrow,
+    nl_heading: marketing.newsletter.heading,
+    nl_heading_highlight: marketing.newsletter.heading_highlight,
+    nl_description: marketing.newsletter.description,
+    nl_benefits: linesToInput(marketing.newsletter.benefits),
+    nl_subscriber_count: marketing.newsletter.subscriber_count,
+    // Marketing — Lookbook Gallery
+    gallery_enabled: gallery.enabled,
+    gallery_eyebrow: gallery.eyebrow,
+    gallery_heading: gallery.heading,
+    gallery_subheading: gallery.subheading,
+    gallery_items: galleryToInput(gallery.items),
+    // Promo Popup
+    promo_enabled: promo.enabled,
+    promo_image: promo.image,
+    promo_link: promo.link,
+    promo_heading: promo.heading,
+    promo_subheading: promo.subheading,
+    promo_cta_label: promo.cta_label,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,6 +144,57 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           enable_whatsapp_fab: formData.enable_whatsapp_fab,
           enable_mobile_bottom_nav: formData.enable_mobile_bottom_nav,
           enable_mobile_bottom_sheet_filters: formData.enable_mobile_bottom_sheet_filters,
+        }),
+      },
+      {
+        key: "marketing_content",
+        value: JSON.stringify({
+          brand_promise: {
+            enabled: formData.bp_enabled,
+            eyebrow: formData.bp_eyebrow,
+            heading: formData.bp_heading,
+            heading_highlight: formData.bp_heading_highlight,
+            description: formData.bp_description,
+            badges: parseLinesInput(formData.bp_badges),
+            stats: parseStatsInput(formData.bp_stats),
+          },
+          style_guide: {
+            enabled: formData.sg_enabled,
+            eyebrow: formData.sg_eyebrow,
+            heading: formData.sg_heading,
+            description: formData.sg_description,
+            cta_label: formData.sg_cta_label,
+          },
+          newsletter: {
+            enabled: formData.nl_enabled,
+            eyebrow: formData.nl_eyebrow,
+            heading: formData.nl_heading,
+            heading_highlight: formData.nl_heading_highlight,
+            description: formData.nl_description,
+            benefits: parseLinesInput(formData.nl_benefits),
+            subscriber_count: formData.nl_subscriber_count,
+          },
+        }),
+      },
+      {
+        key: "marketing_gallery",
+        value: JSON.stringify({
+          enabled: formData.gallery_enabled,
+          eyebrow: formData.gallery_eyebrow,
+          heading: formData.gallery_heading,
+          subheading: formData.gallery_subheading,
+          items: parseGalleryInput(formData.gallery_items),
+        }),
+      },
+      {
+        key: "promo_popup",
+        value: JSON.stringify({
+          enabled: formData.promo_enabled,
+          image: formData.promo_image,
+          link: formData.promo_link,
+          heading: formData.promo_heading,
+          subheading: formData.promo_subheading,
+          cta_label: formData.promo_cta_label,
         }),
       },
     ]
@@ -340,6 +438,330 @@ export function SettingsForm({ settings }: SettingsFormProps) {
               onChange={(e) => setFormData({ ...formData, custom_add_on_options: e.target.value })}
               rows={6}
               placeholder={"Anti-Glare Coating|350\nScratch Resistant Coating|250"}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Homepage Marketing Sections</CardTitle>
+          <CardDescription>
+            Edit the copy for the Brand Promise, Style Guide, and Newsletter sections — or hide them entirely.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-8">
+          {/* Brand Promise */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Brand Promise</h3>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={formData.bp_enabled}
+                  onChange={(e) => setFormData({ ...formData, bp_enabled: e.target.checked })}
+                />
+                Show section
+              </label>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="bp_eyebrow">Eyebrow / Label</Label>
+              <Input
+                id="bp_eyebrow"
+                value={formData.bp_eyebrow}
+                onChange={(e) => setFormData({ ...formData, bp_eyebrow: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="bp_heading">Heading</Label>
+                <Input
+                  id="bp_heading"
+                  value={formData.bp_heading}
+                  onChange={(e) => setFormData({ ...formData, bp_heading: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="bp_heading_highlight">Heading Highlight (gold)</Label>
+                <Input
+                  id="bp_heading_highlight"
+                  value={formData.bp_heading_highlight}
+                  onChange={(e) => setFormData({ ...formData, bp_heading_highlight: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="bp_description">Description</Label>
+              <Textarea
+                id="bp_description"
+                value={formData.bp_description}
+                onChange={(e) => setFormData({ ...formData, bp_description: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="bp_badges">Trust Badges (one per line)</Label>
+              <Textarea
+                id="bp_badges"
+                value={formData.bp_badges}
+                onChange={(e) => setFormData({ ...formData, bp_badges: e.target.value })}
+                rows={3}
+                placeholder={"Free Shipping Inside Dhaka\nPremium Quality Guaranteed"}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="bp_stats">Stats (one per line: Value|Suffix|Label|Description)</Label>
+              <Textarea
+                id="bp_stats"
+                value={formData.bp_stats}
+                onChange={(e) => setFormData({ ...formData, bp_stats: e.target.value })}
+                rows={5}
+                placeholder={"10000|+|Happy Customers|Trusted across Bangladesh\n500|+|Frame Styles|For every face shape"}
+              />
+              <p className="text-xs text-muted-foreground">
+                Value must be a number (it animates). Suffix examples: +, %, ★
+              </p>
+            </div>
+          </div>
+
+          {/* Style Guide */}
+          <div className="flex flex-col gap-4 border-t border-border pt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Style Guide</h3>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={formData.sg_enabled}
+                  onChange={(e) => setFormData({ ...formData, sg_enabled: e.target.checked })}
+                />
+                Show section
+              </label>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="sg_eyebrow">Eyebrow / Label</Label>
+              <Input
+                id="sg_eyebrow"
+                value={formData.sg_eyebrow}
+                onChange={(e) => setFormData({ ...formData, sg_eyebrow: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="sg_heading">Heading</Label>
+              <Input
+                id="sg_heading"
+                value={formData.sg_heading}
+                onChange={(e) => setFormData({ ...formData, sg_heading: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="sg_description">Description</Label>
+              <Textarea
+                id="sg_description"
+                value={formData.sg_description}
+                onChange={(e) => setFormData({ ...formData, sg_description: e.target.value })}
+                rows={2}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="sg_cta_label">Button Label</Label>
+              <Input
+                id="sg_cta_label"
+                value={formData.sg_cta_label}
+                onChange={(e) => setFormData({ ...formData, sg_cta_label: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Newsletter */}
+          <div className="flex flex-col gap-4 border-t border-border pt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Newsletter</h3>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={formData.nl_enabled}
+                  onChange={(e) => setFormData({ ...formData, nl_enabled: e.target.checked })}
+                />
+                Show section
+              </label>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="nl_eyebrow">Eyebrow / Label</Label>
+              <Input
+                id="nl_eyebrow"
+                value={formData.nl_eyebrow}
+                onChange={(e) => setFormData({ ...formData, nl_eyebrow: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="nl_heading">Heading</Label>
+                <Input
+                  id="nl_heading"
+                  value={formData.nl_heading}
+                  onChange={(e) => setFormData({ ...formData, nl_heading: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="nl_heading_highlight">Heading Highlight (gold)</Label>
+                <Input
+                  id="nl_heading_highlight"
+                  value={formData.nl_heading_highlight}
+                  onChange={(e) => setFormData({ ...formData, nl_heading_highlight: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="nl_description">Description</Label>
+              <Textarea
+                id="nl_description"
+                value={formData.nl_description}
+                onChange={(e) => setFormData({ ...formData, nl_description: e.target.value })}
+                rows={2}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="nl_benefits">Benefits (one per line)</Label>
+              <Textarea
+                id="nl_benefits"
+                value={formData.nl_benefits}
+                onChange={(e) => setFormData({ ...formData, nl_benefits: e.target.value })}
+                rows={4}
+                placeholder={"Exclusive deals & early access\nNew arrival alerts"}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="nl_subscriber_count">Subscriber Count (social proof)</Label>
+              <Input
+                id="nl_subscriber_count"
+                value={formData.nl_subscriber_count}
+                onChange={(e) => setFormData({ ...formData, nl_subscriber_count: e.target.value })}
+                placeholder="2,500+"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Lookbook Gallery (Image Showcase)</CardTitle>
+          <CardDescription>
+            An image-based section on the homepage to showcase products and customer looks. Leave images empty to auto-show your top products.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={formData.gallery_enabled}
+              onChange={(e) => setFormData({ ...formData, gallery_enabled: e.target.checked })}
+            />
+            Show section on homepage
+          </label>
+          <div className="grid gap-2">
+            <Label htmlFor="gallery_eyebrow">Eyebrow / Label</Label>
+            <Input
+              id="gallery_eyebrow"
+              value={formData.gallery_eyebrow}
+              onChange={(e) => setFormData({ ...formData, gallery_eyebrow: e.target.value })}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="gallery_heading">Heading</Label>
+            <Input
+              id="gallery_heading"
+              value={formData.gallery_heading}
+              onChange={(e) => setFormData({ ...formData, gallery_heading: e.target.value })}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="gallery_subheading">Subheading</Label>
+            <Input
+              id="gallery_subheading"
+              value={formData.gallery_subheading}
+              onChange={(e) => setFormData({ ...formData, gallery_subheading: e.target.value })}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="gallery_items">
+              Images (one per line: ImageURL|Link|Caption)
+            </Label>
+            <Textarea
+              id="gallery_items"
+              value={formData.gallery_items}
+              onChange={(e) => setFormData({ ...formData, gallery_items: e.target.value })}
+              rows={6}
+              placeholder={"https://.../look1.jpg|/products/aviator-classic|Summer Vibes\nhttps://.../customer1.jpg||Happy Customer"}
+            />
+            <p className="text-xs text-muted-foreground">
+              Up to 6 images shown. Link and Caption are optional (leave blank but keep the | separators). First image displays larger.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Promotional Popup</CardTitle>
+          <CardDescription>
+            A lightweight image popup shown once per visit. Great for offers and announcements.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={formData.promo_enabled}
+              onChange={(e) => setFormData({ ...formData, promo_enabled: e.target.checked })}
+            />
+            Enable popup (requires an image URL below)
+          </label>
+          <div className="grid gap-2">
+            <Label htmlFor="promo_image">Image URL</Label>
+            <Input
+              id="promo_image"
+              value={formData.promo_image}
+              onChange={(e) => setFormData({ ...formData, promo_image: e.target.value })}
+              placeholder="https://.../promo.jpg"
+            />
+            <p className="text-xs text-muted-foreground">
+              Recommended portrait (4:5). Upload to your image host / Supabase storage and paste the public URL.
+            </p>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="promo_link">Link (where the popup leads)</Label>
+            <Input
+              id="promo_link"
+              value={formData.promo_link}
+              onChange={(e) => setFormData({ ...formData, promo_link: e.target.value })}
+              placeholder="/products"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="promo_heading">Heading (optional)</Label>
+              <Input
+                id="promo_heading"
+                value={formData.promo_heading}
+                onChange={(e) => setFormData({ ...formData, promo_heading: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="promo_cta_label">Button Label</Label>
+              <Input
+                id="promo_cta_label"
+                value={formData.promo_cta_label}
+                onChange={(e) => setFormData({ ...formData, promo_cta_label: e.target.value })}
+              />
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="promo_subheading">Subheading (optional)</Label>
+            <Input
+              id="promo_subheading"
+              value={formData.promo_subheading}
+              onChange={(e) => setFormData({ ...formData, promo_subheading: e.target.value })}
             />
           </div>
         </CardContent>

@@ -2,11 +2,16 @@ import { createClient } from "@/lib/supabase/server"
 import { QuickViewProvider } from "@/components/store/quick-view-context"
 import { WishlistProvider } from "@/components/store/wishlist-context"
 import { QuickViewPanel } from "@/components/store/quick-view-panel"
+import { WishlistSheet } from "@/components/store/wishlist-sheet"
 import { WhatsAppFAB } from "@/components/store/whatsapp-fab"
 import { MobileBottomNav } from "@/components/store/mobile-bottom-nav"
+import { PromoPopup } from "@/components/store/promo-popup"
 import { Header } from "@/components/store/header"
 import { Footer } from "@/components/store/footer"
-import { resolveStorefrontFeaturesSettings } from "@/lib/site-settings"
+import {
+  resolveStorefrontFeaturesSettings,
+  resolvePromoPopup,
+} from "@/lib/site-settings"
 
 export default async function StoreLayout({
   children,
@@ -21,15 +26,20 @@ export default async function StoreLayout({
     .eq("is_active", true)
     .order("sort_order")
 
-  const { data: storefrontFeatureSetting } = await supabase
+  const { data: layoutSettings } = await supabase
     .from("site_settings")
-    .select("value")
-    .eq("key", "storefront_features")
-    .maybeSingle()
+    .select("key, value")
+    .in("key", ["storefront_features", "promo_popup"])
+
+  const layoutSettingsMap = (layoutSettings || []).reduce((acc, row) => {
+    acc[row.key] = row.value
+    return acc
+  }, {} as Record<string, unknown>)
 
   const storefrontFeatures = resolveStorefrontFeaturesSettings(
-    storefrontFeatureSetting?.value
+    layoutSettingsMap.storefront_features
   )
+  const promoPopup = resolvePromoPopup(layoutSettingsMap.promo_popup)
 
   return (
     <WishlistProvider>
@@ -40,6 +50,8 @@ export default async function StoreLayout({
           <Footer />
         </div>
         <QuickViewPanel />
+        <WishlistSheet />
+        <PromoPopup content={promoPopup} />
         {storefrontFeatures.enable_whatsapp_fab && (
           <WhatsAppFAB
             whatsappNumber={storefrontFeatures.whatsapp_number}

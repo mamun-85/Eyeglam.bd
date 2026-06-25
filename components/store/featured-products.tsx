@@ -12,11 +12,11 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   if (products.length === 0) return null
 
   return (
-    <section className="bg-muted/50 py-16 sm:py-24">
+    <section className="bg-muted/50 py-12 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h2 className="font-serif text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
               Featured Collection
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">

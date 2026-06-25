@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { Menu, ShoppingBag, Search } from "lucide-react"
+import { Menu, ShoppingBag, Search, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useCart } from "@/components/cart-provider"
 import { CartSheet } from "@/components/store/cart-sheet"
+import { useWishlist } from "@/components/store/wishlist-context"
 import type { Category } from "@/lib/types"
 
 interface HeaderProps {
@@ -20,6 +21,7 @@ export function Header({ categories }: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { totalItems, setIsOpen } = useCart()
+  const { totalItems: wishlistCount, setIsOpen: setWishlistOpen } = useWishlist()
 
   const navItems = [
     { href: "/products", label: "All Products" },
@@ -154,6 +156,20 @@ export function Header({ categories }: HeaderProps) {
             <Button variant="ghost" size="icon" className="md:hidden" onClick={submitSearch}>
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative hidden sm:inline-flex"
+              onClick={() => setWishlistOpen(true)}
+            >
+              <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-medium text-destructive-foreground">
+                  {wishlistCount}
+                </span>
+              )}
+              <span className="sr-only">Wishlist</span>
             </Button>
             <Button
               variant="ghost"

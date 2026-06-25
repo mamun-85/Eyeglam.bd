@@ -68,23 +68,28 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
         <motion.div
           key={currentIndex}
           custom={direction}
-          initial={(d: number) => ({ x: d > 0 ? "100%" : "-100%", opacity: 0 })}
-          animate={{
-            x: 0,
-            opacity: 1,
-            transition: {
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.4 },
+          variants={{
+            enter: (d: number) => ({ x: d > 0 ? "100%" : "-100%", opacity: 0 }),
+            center: {
+              x: 0,
+              opacity: 1,
+              transition: {
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.4 },
+              },
             },
+            exit: (d: number) => ({
+              x: d < 0 ? "100%" : "-100%",
+              opacity: 0,
+              transition: {
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.3 },
+              },
+            }),
           }}
-          exit={(d: number) => ({
-            x: d < 0 ? "100%" : "-100%",
-            opacity: 0,
-            transition: {
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.3 },
-            },
-          })}
+          initial="enter"
+          animate="center"
+          exit="exit"
           className="absolute inset-0"
         >
           {/* Video or Art-directed <picture> background */}
@@ -133,9 +138,14 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
           <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/70 via-black/40 sm:via-foreground/30 to-transparent" />
 
           {/* Text content: positioned in lower third on mobile */}
-          <div className="absolute inset-0 flex items-end sm:items-center pb-16 sm:pb-0">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
-              <div className="max-w-xl">
+          <div
+            className={cn(
+              "absolute inset-0 flex items-end sm:items-center sm:pb-0",
+              slides.length > 1 ? "pb-28" : "pb-16"
+            )}
+          >
+            <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+              <div className="max-w-xl text-left">
                 <motion.h1
                   custom={0.1}
                   variants={textRevealVariants}

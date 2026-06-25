@@ -16,7 +16,7 @@ const NAV_ITEMS = [
 export function MobileBottomNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const { totalItems } = useWishlist()
+  const { totalItems, setIsOpen: setWishlistOpen } = useWishlist()
 
   const handleSpecialAction = (e: React.MouseEvent, href: string) => {
     if (href === "#search") {
@@ -31,8 +31,7 @@ export function MobileBottomNav() {
     }
     if (href === "#wishlist") {
       e.preventDefault()
-      // Could open a wishlist sheet here
-      // For now, navigate to products with wishlist overlay
+      setWishlistOpen(true)
     }
   }
 

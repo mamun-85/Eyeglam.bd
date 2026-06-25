@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,15 @@ export function CustomFrameBuilder({
   const [selectedFrameId, setSelectedFrameId] = useState(frames[0]?.id || "")
   const [selectedLensName, setSelectedLensName] = useState(lensOptions[0]?.name || "")
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([])
+  const lensPanelRef = useRef<HTMLDivElement>(null)
+
+  const handleSelectFrame = (frameId: string) => {
+    setSelectedFrameId(frameId)
+    // Guide the user straight to lens selection (esp. on mobile where panels stack)
+    requestAnimationFrame(() => {
+      lensPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+  }
 
   const selectedFrame = useMemo(
     () => frames.find((frame) => frame.id === selectedFrameId),
@@ -96,7 +105,7 @@ export function CustomFrameBuilder({
                     ? "border-accent bg-accent/5"
                     : "border-border hover:border-accent/40"
                 }`}
-                onClick={() => setSelectedFrameId(frame.id)}
+                onClick={() => handleSelectFrame(frame.id)}
               >
                 <div className="relative h-28 w-full overflow-hidden rounded-md bg-muted">
                   <Image
@@ -114,7 +123,7 @@ export function CustomFrameBuilder({
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div ref={lensPanelRef} className="scroll-mt-20 rounded-xl border border-border bg-card p-6">
         <h2 className="text-xl font-semibold">Choose Lenses & Add-ons</h2>
 
         <div className="mt-5 grid gap-2">

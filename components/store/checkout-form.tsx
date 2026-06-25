@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Spinner } from "@/components/ui/spinner"
-import { formatPrice } from "@/lib/utils"
+import { formatPrice, cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import type { ShippingInfoSettings } from "@/lib/site-settings"
 
@@ -42,14 +42,14 @@ export function CheckoutForm({ shippingInfo }: CheckoutFormProps) {
     try {
       const orderData = {
         customer_name: formData.get("name") as string,
-        customer_email: formData.get("email") as string,
+        customer_email: (formData.get("email") as string) || "",
         customer_phone: formData.get("phone") as string,
         shipping_address: {
-          street: formData.get("street") as string,
-          city: formData.get("city") as string,
-          state: formData.get("state") as string,
-          zip: formData.get("zip") as string,
-          country: formData.get("country") as string,
+          street: formData.get("address") as string,
+          city: formData.get("area") as string,
+          state: "",
+          zip: "",
+          country: "Bangladesh",
           delivery_zone: shippingZone,
         },
         items: items.map((item) => ({
@@ -106,73 +106,70 @@ export function CheckoutForm({ shippingInfo }: CheckoutFormProps) {
       <div className="flex flex-col gap-6">
         <div>
           <h2 className="text-lg font-semibold text-foreground">
-            Contact Information
+            Delivery Details
           </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            We&apos;ll call you on this number to confirm your order.
+          </p>
           <div className="mt-4 grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Full Name</Label>
-              <Input id="name" name="name" required />
+              <Input id="name" name="name" placeholder="Your name" required />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" required />
+              <Label htmlFor="phone">Mobile Number</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                placeholder="01XXXXXXXXX"
+                required
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" name="phone" type="tel" />
+              <Label htmlFor="address">Full Address</Label>
+              <Textarea
+                id="address"
+                name="address"
+                placeholder="House / road / block, landmark"
+                rows={2}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="area">Area / Thana / District</Label>
+              <Input id="area" name="area" placeholder="e.g. Dhanmondi, Dhaka" required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input id="email" name="email" type="email" placeholder="you@example.com" />
             </div>
           </div>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-foreground">
-            Shipping Address
-          </h2>
-          <div className="mt-4 grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="street">Street Address</Label>
-              <Input id="street" name="street" required />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="city">City</Label>
-                <Input id="city" name="city" required />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="state">State</Label>
-                <Input id="state" name="state" required />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="zip">ZIP Code</Label>
-                <Input id="zip" name="zip" required />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="country">Country</Label>
-                <Input id="country" name="country" defaultValue="United States" required />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Delivery Zone</h2>
-          <div className="mt-4 grid gap-3">
-            <Label htmlFor="shipping_zone">Choose area</Label>
-            <select
-              id="shipping_zone"
-              name="shipping_zone"
-              value={shippingZone}
-              onChange={(e) => setShippingZone(e.target.value as "inside_dhaka" | "outside_dhaka")}
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-            >
-              <option value="inside_dhaka">Inside Dhaka</option>
-              <option value="outside_dhaka">Outside Dhaka</option>
-            </select>
-            <p className="text-xs text-muted-foreground">
-              Shipping charge for this selection: {formatPrice(baseShipping)}
-            </p>
+          <h2 className="text-lg font-semibold text-foreground">Delivery Area</h2>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            {([
+              { value: "inside_dhaka", label: "Inside Dhaka", cost: shippingInfo.inside_dhaka_shipping },
+              { value: "outside_dhaka", label: "Outside Dhaka", cost: shippingInfo.outside_dhaka_shipping },
+            ] as const).map((zone) => (
+              <button
+                key={zone.value}
+                type="button"
+                onClick={() => setShippingZone(zone.value)}
+                className={cn(
+                  "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors",
+                  shippingZone === zone.value
+                    ? "border-foreground bg-foreground/5 ring-1 ring-foreground"
+                    : "border-border hover:border-foreground/40"
+                )}
+              >
+                <span className="text-sm font-medium">{zone.label}</span>
+                <span className="text-xs text-muted-foreground">{formatPrice(zone.cost)}</span>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -180,12 +177,12 @@ export function CheckoutForm({ shippingInfo }: CheckoutFormProps) {
           <h2 className="text-lg font-semibold text-foreground">
             Order Notes (Optional)
           </h2>
-          <div className="mt-4">
+          <div className="mt-3">
             <Textarea
               id="notes"
               name="notes"
               placeholder="Any special instructions for your order..."
-              rows={3}
+              rows={2}
             />
           </div>
         </div>

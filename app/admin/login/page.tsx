@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
       return
     }
 
-    if (!data.user?.user_metadata?.is_admin) {
+    if (!data.user?.app_metadata?.is_admin) {
       await supabase.auth.signOut()
       setError("You do not have admin access")
       setIsLoading(false)

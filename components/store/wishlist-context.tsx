@@ -10,6 +10,8 @@ interface WishlistContextType {
   toggleItem: (item: Omit<WishlistItem, "added_at">) => boolean
   isInWishlist: (id: string) => boolean
   totalItems: number
+  isOpen: boolean
+  setIsOpen: (open: boolean) => void
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined)
@@ -17,6 +19,7 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([])
   const [isHydrated, setIsHydrated] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -65,7 +68,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   return (
     <WishlistContext.Provider
-      value={{ items, addItem, removeItem, toggleItem, isInWishlist, totalItems }}
+      value={{ items, addItem, removeItem, toggleItem, isInWishlist, totalItems, isOpen, setIsOpen }}
     >
       {children}
     </WishlistContext.Provider>

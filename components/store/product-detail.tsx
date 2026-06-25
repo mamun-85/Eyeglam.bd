@@ -127,8 +127,10 @@ export function ProductDetail({
 
   const currentStock = selectedVariant?.stock ?? product.stock_quantity
 
+  const displayPrice = isOnSale ? product.sale_price! : product.price
+
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 pb-28 sm:px-6 sm:pb-0 lg:px-8">
       {/* Breadcrumb */}
       <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground transition-colors">
@@ -391,6 +393,42 @@ export function ProductDetail({
         </div>
       </div>
 
+      {/* Mobile sticky add-to-cart bar */}
+      <div
+        className="fixed inset-x-0 z-40 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:hidden"
+        style={{ bottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col leading-tight">
+            <span className="text-lg font-bold text-foreground">
+              {formatPrice(displayPrice)}
+            </span>
+            {isOnSale && (
+              <span className="text-xs text-muted-foreground line-through">
+                {formatPrice(product.price)}
+              </span>
+            )}
+          </div>
+          <Button
+            size="lg"
+            className="h-12 flex-1 text-base font-semibold"
+            onClick={handleAddToCart}
+            disabled={currentStock === 0}
+          >
+            <ShoppingBag className="mr-2 h-5 w-5" />
+            {currentStock === 0 ? "Out of Stock" : "Add to Cart"}
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="h-12 w-12 shrink-0 border-[#25D366]/40 p-0 text-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366]"
+            onClick={handleWhatsAppOrder}
+            aria-label="Order via WhatsApp"
+          >
+            <MessageCircle className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

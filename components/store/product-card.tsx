@@ -128,8 +128,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <motion.div
       variants={fadeInUp}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
+      animate="visible"
       whileHover={{ scale: 1.03 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       onMouseEnter={() => setIsHovered(true)}

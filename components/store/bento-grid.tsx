@@ -119,7 +119,7 @@ function HeroTile({ product }: { product: Product }) {
   )
 }
 
-function BentoCard({ product, index }: { product: Product; index: number }) {
+function BentoCard({ product }: { product: Product }) {
   const { openQuickView } = useQuickView()
   const [isHovered, setIsHovered] = useState(false)
   const mainImage = product.thumbnail_url || product.images[0] || "/placeholder.svg"
@@ -127,21 +127,22 @@ function BentoCard({ product, index }: { product: Product; index: number }) {
   const isOnSale = product.sale_price !== null && product.sale_price < product.price
 
   return (
-    <motion.div
-      variants={fadeInUp}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ scale: 1.02 }}
-      className="group relative overflow-hidden rounded-xl bg-muted cursor-pointer"
-    >
-      <Link href={`/products/${product.slug}`} className="block aspect-square relative">
+    <motion.div variants={fadeInUp} className="group flex flex-col">
+      {/* Image */}
+      <Link
+        href={`/products/${product.slug}`}
+        className="relative block aspect-square overflow-hidden rounded-xl bg-muted"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         {/* Primary Image */}
         <Image
           src={mainImage}
           alt={product.name}
           fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={cn(
-            "object-cover transition-opacity duration-500",
+            "object-cover transition-all duration-500 group-hover:scale-105",
             isHovered && secondaryImage ? "opacity-0" : "opacity-100"
           )}
           loading="lazy"
@@ -153,8 +154,9 @@ function BentoCard({ product, index }: { product: Product; index: number }) {
             src={secondaryImage}
             alt={`${product.name} lifestyle`}
             fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className={cn(
-              "object-cover transition-opacity duration-500 absolute inset-0",
+              "object-cover transition-all duration-500 absolute inset-0 group-hover:scale-105",
               isHovered ? "opacity-100" : "opacity-0"
             )}
             loading="lazy"
@@ -163,17 +165,17 @@ function BentoCard({ product, index }: { product: Product; index: number }) {
 
         {/* Sale badge */}
         {isOnSale && (
-          <span className="absolute left-3 top-3 rounded-full bg-destructive px-2.5 py-1 text-xs font-medium text-destructive-foreground z-10">
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-destructive px-2.5 py-1 text-[11px] font-semibold text-destructive-foreground z-10">
             Sale
           </span>
         )}
 
-        {/* Quick View button on hover */}
-        <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 translate-y-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 z-10">
+        {/* Quick View button — desktop hover only */}
+        <div className="absolute inset-x-0 bottom-0 hidden p-2.5 opacity-0 translate-y-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 z-10 sm:block">
           <Button
             size="sm"
             variant="secondary"
-            className="w-full backdrop-blur-sm bg-background/80"
+            className="w-full backdrop-blur-sm bg-background/85"
             onClick={(e) => {
               e.preventDefault()
               openQuickView(product)
@@ -183,33 +185,32 @@ function BentoCard({ product, index }: { product: Product; index: number }) {
             Quick View
           </Button>
         </div>
+      </Link>
 
-        {/* Bottom gradient */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-
-        {/* Product info overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-3 pb-12 z-[5]">
-          <h3 className="text-sm font-medium text-white truncate">
+      {/* Caption below image — clean, no overlap */}
+      <div className="mt-2.5 px-0.5">
+        <Link href={`/products/${product.slug}`}>
+          <h3 className="text-sm font-medium text-foreground line-clamp-1 transition-colors group-hover:text-accent">
             {product.name}
           </h3>
-          <div className="flex items-center gap-2 mt-0.5">
-            {isOnSale ? (
-              <>
-                <span className="text-sm font-bold text-white">
-                  {formatPrice(product.sale_price!)}
-                </span>
-                <span className="text-xs text-white/60 line-through">
-                  {formatPrice(product.price)}
-                </span>
-              </>
-            ) : (
-              <span className="text-sm font-bold text-white">
+        </Link>
+        <div className="mt-1 flex items-center gap-2">
+          {isOnSale ? (
+            <>
+              <span className="text-sm font-bold text-accent">
+                {formatPrice(product.sale_price!)}
+              </span>
+              <span className="text-xs text-muted-foreground line-through">
                 {formatPrice(product.price)}
               </span>
-            )}
-          </div>
+            </>
+          ) : (
+            <span className="text-sm font-bold text-foreground">
+              {formatPrice(product.price)}
+            </span>
+          )}
         </div>
-      </Link>
+      </div>
     </motion.div>
   )
 }
@@ -227,11 +228,11 @@ export function BentoGrid({ products, heroProduct }: BentoGridProps) {
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
-      className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 auto-rows-fr"
+      className="grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-4 sm:gap-y-8 sm:grid-cols-3 lg:grid-cols-4"
     >
       <HeroTile product={hero} />
-      {gridProducts.map((product, index) => (
-        <BentoCard key={product.id} product={product} index={index} />
+      {gridProducts.map((product) => (
+        <BentoCard key={product.id} product={product} />
       ))}
     </motion.div>
   )
